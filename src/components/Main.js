@@ -6,28 +6,19 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Container from '@material-ui/core/Container';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import axios from 'axios'
 import { UserContext } from '../contexts/UserContext'
 
-export default Main => {
+const Main = ({history}) => {
 
   const { 
-    user,
     updateUsername,
-    name, 
-    avatar, 
     updateName, 
     updateAvatar, 
-    repos, 
-    updateRepos, 
     resetRepos,
-    updateFoundStatus,
-    notFound } = useContext(UserContext)
+    updateFoundStatus
+    } = useContext(UserContext)
   
   const classes = useStyles();
   const [username, setUsername] = useState("");
@@ -41,24 +32,12 @@ export default Main => {
       updateUsername(res.data.login)
       updateAvatar(res.data.avatar_url)
       updateName(res.data.name)
-      //Load repos
-      axios.get('https://api.github.com/users/'+ username +'/repos')
-      .then(res => {
-        console.log(res.data)
-        if(res.data.length === 0) alert('No repos found')
-        res.data.map(repo => {
-          //console.log(item.name)
-          updateRepos(repos => [...repos, repo]);
-        })
-      })
-      .catch(error => {
-        console.log(error)
-      })
-
+      history.push('/profile')
     })
     .catch(error => {
       console.log(error.response)
       if(error.response.status === 404) {
+        history.push('/profile')
         updateFoundStatus(true)
       }
     })
@@ -101,27 +80,8 @@ export default Main => {
             </form>
           </div>
       </Container>
-      <Grid container className={classes.main}>
-        <Grid item xs={12}>
-        { name !== '' && notFound === false ? (
-          <Paper className={classes.paper}>
-            <Avatar alt={name} src={avatar} className={classes.large}/>
-            <h1>{name}</h1>
-            <h2>{user}</h2>
-            {repos.map(repo => (
-              <ListItem button key={repo.id}>
-                <ListItemText primary={repo.name} secondary={'star count: ' + repo.stargazers_count}/>
-              </ListItem>
-            ))}
-          </Paper>
-        ) : (<div></div>)}
-        {notFound === true ? (
-          <Paper className={classes.paper}>
-            <h1>User not found!</h1>
-          </Paper>
-        ) : (<div></div>)}
-        </Grid>
-      </Grid>
     </div>
   );
 }
+
+export default Main
